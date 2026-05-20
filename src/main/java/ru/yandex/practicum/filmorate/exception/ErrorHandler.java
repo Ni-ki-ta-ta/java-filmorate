@@ -41,4 +41,16 @@ public class ErrorHandler {
                 "error", errorMessage
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFoundException(
+            final NotFoundException e
+    ) {
+        log.error("Ошибка поиска объекта: {}", e.getMessage());
+
+        return Map.of(
+                "error", e.getMessage()
+        );
+    }
 }
