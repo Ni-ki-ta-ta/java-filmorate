@@ -2,12 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -23,12 +18,15 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
 
+    private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+
     private final Map<Long, Film> films = new HashMap<>();
 
     private long nextId = 1;
 
     @GetMapping
     public List<Film> findAll() {
+        log.info("Получен список фильмов");
         return new ArrayList<>(films.values());
     }
 
@@ -61,12 +59,18 @@ public class FilmController {
     }
 
     private void validateFilm(Film film) {
-        LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
-
-        if (film.getReleaseDate().isBefore(minReleaseDate)) {
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             log.error("Дата релиза раньше 28 декабря 1895 года");
             throw new ValidationException(
                     "Дата релиза не может быть раньше 28 декабря 1895 года"
+            );
+        }
+
+        if (film.getReleaseDate().isAfter(LocalDate.now().plusYears(1))) {
+            log.error("Дата релиза фильма слишком далеко в будущем");
+
+            throw new ValidationException(
+                    "Дата релиза фильма не может быть слишком далеко в будущем"
             );
         }
     }
