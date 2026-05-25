@@ -43,8 +43,6 @@ public class UserController {
     public User create(@Valid @RequestBody User user) {
         validateUser(user);
 
-        setUserName(user);
-
         log.info("Добавлен пользователь: {}", user);
 
         return userService.create(user);
@@ -53,8 +51,6 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         validateUser(user);
-
-        setUserName(user);
 
         log.info("Обновлен пользователь: {}", user);
 
@@ -117,12 +113,6 @@ public class UserController {
             throw new ValidationException(
                     "Логин не может содержать пробелы"
             );
-        }
-    }
-
-    private void setUserName(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
         }
     }
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -31,23 +32,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new NotFoundException("Фильм не найден");
-        }
-
         films.put(film.getId(), film);
 
         return film;
     }
 
     @Override
-    public Film findById(Long id) {
-        Film film = films.get(id);
-
-        if (film == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
-
-        return film;
+    public Optional<Film> findById(Long id) {
+        return Optional.ofNullable(films.get(id));
     }
 }

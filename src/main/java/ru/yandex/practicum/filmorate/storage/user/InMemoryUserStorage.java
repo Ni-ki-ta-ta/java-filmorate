@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -31,23 +32,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
         users.put(user.getId(), user);
 
         return user;
     }
 
     @Override
-    public User findById(Long id) {
-        User user = users.get(id);
-
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        return user;
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 }
