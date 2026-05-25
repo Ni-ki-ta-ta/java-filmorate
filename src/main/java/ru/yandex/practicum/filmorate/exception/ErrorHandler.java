@@ -53,4 +53,14 @@ public class ErrorHandler {
                 "error", e.getMessage()
         );
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleException(Exception e) {
+        log.error("Внутренняя ошибка сервера", e);
+
+        return Map.of(
+                "error", "Произошла внутренняя ошибка сервера"
+        );
+    }
 }
