@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -20,51 +21,91 @@ public class UserController {
     @GetMapping
     public List<User> findAll() {
         log.info("Получен список пользователей");
+
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public User findById(@PathVariable Long id) {
         log.info("Получен пользователь с id {}", id);
+
         return userService.findById(id);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        User createdUser = userService.create(user);
-        log.info("Добавлен пользователь: {}", createdUser);
-        return createdUser;
+        validateUser(user);
+
+        log.info("Добавлен пользователь: {}", user);
+
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        User updatedUser = userService.update(user);
-        log.info("Обновлен пользователь: {}", updatedUser);
-        return updatedUser;
+        validateUser(user);
+
+        log.info("Обновлен пользователь: {}", user);
+
+        return userService.update(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void addFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+        log.info(
+                "Пользователь {} добавил в друзья пользователя {}",
+                id,
+                friendId
+        );
+
         userService.addFriend(id, friendId);
-        log.info("Пользователь {} добавил в друзья {}", id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void removeFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+        log.info(
+                "Пользователь {} удалил из друзей пользователя {}",
+                id,
+                friendId
+        );
+
         userService.removeFriend(id, friendId);
-        log.info("Пользователь {} удалил из друзей {}", id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> findFriends(@PathVariable Long id) {
+    public List<User> getFriends(@PathVariable Long id) {
         log.info("Получен список друзей пользователя {}", id);
-        return userService.findFriends(id);
+
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> findCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        log.info("Получен список общих друзей пользователей {} и {}", id, otherId);
+    public List<User> getCommonFriends(
+            @PathVariable Long id,
+            @PathVariable Long otherId
+    ) {
+        log.info(
+                "Получен список общих друзей пользователей {} и {}",
+                id,
+                otherId
+        );
 
-        return userService.findCommonFriends(id, otherId);
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    private void validateUser(User user) {
+        if (user.getLogin().contains(" ")) {
+            log.error("Логин содержит пробелы");
+
+            throw new ValidationException(
+                    "Логин не может содержать пробелы"
+            );
+        }
     }
 }
