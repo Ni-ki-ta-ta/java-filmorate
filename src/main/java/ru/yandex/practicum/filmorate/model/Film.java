@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Film {
@@ -25,4 +27,8 @@ public class Film {
 
     @NotNull(message = "Дата релиза не может быть пустой")
     private LocalDate releaseDate;
+
+    private Mpa mpa;
+
+    private List<Genre> genres = new ArrayList<>();
 }
