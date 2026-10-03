@@ -1,11 +1,11 @@
 MERGE INTO mpa (mpa_id, name)
     KEY (mpa_id)
     VALUES
-    (1, '0+'),
-    (2, '6+'),
-    (3, '12+'),
-    (4, '16+'),
-    (5, '18+');
+    (1, 'G'),
+    (2, 'PG'),
+    (3, 'PG-13'),
+    (4, 'R'),
+    (5, 'NC-17');
 
 MERGE INTO genres (genre_id, name)
     KEY (genre_id)
