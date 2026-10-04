@@ -18,6 +18,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
+    private static final String FILM_ID_COLUMN = "film_id";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -46,6 +48,10 @@ public class FilmDbStorage implements FilmStorage {
 
             return ps;
         }, keyHolder);
+
+        if (keyHolder.getKey() == null) {
+            throw new IllegalStateException("Не удалось получить id фильма после сохранения");
+        }
 
         film.setId(keyHolder.getKey().longValue());
 
@@ -109,7 +115,7 @@ public class FilmDbStorage implements FilmStorage {
                 (rs, rowNum) -> {
                     Film film = new Film();
 
-                    film.setId(rs.getLong("film_id"));
+                    film.setId(rs.getLong(FILM_ID_COLUMN));
                     film.setName(rs.getString("name"));
                     film.setDescription(rs.getString("description"));
                     film.setReleaseDate(
@@ -148,7 +154,7 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Film film = new Film();
 
-            film.setId(rs.getLong("film_id"));
+            film.setId(rs.getLong(FILM_ID_COLUMN));
             film.setName(rs.getString("name"));
             film.setDescription(rs.getString("description"));
             film.setReleaseDate(
@@ -291,7 +297,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Long> filmIds = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> rs.getLong("film_id"),
+                (rs, rowNum) -> rs.getLong(FILM_ID_COLUMN),
                 count
         );
 

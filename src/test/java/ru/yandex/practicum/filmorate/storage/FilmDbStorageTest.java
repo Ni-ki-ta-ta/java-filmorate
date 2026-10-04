@@ -34,11 +34,11 @@ class FilmDbStorageTest {
                 MERGE INTO mpa (mpa_id, name)
                 KEY (mpa_id)
                 VALUES
-                    (1, '0+'),
-                    (2, '6+'),
-                    (3, '12+'),
-                    (4, '16+'),
-                    (5, '18+')
+                    (1, 'G'),
+                    (2, 'PG'),
+                    (3, 'PG-13'),
+                    (4, 'R'),
+                    (5, 'NC-17')
                 """);
 
         jdbcTemplate.update("""
@@ -130,7 +130,7 @@ class FilmDbStorageTest {
                 "Название найденного фильма должно совпадать"
         );
         assertEquals(
-                "16+",
+                "R",
                 foundFilm.get().getMpa().getName(),
                 "MPA фильма должен загружаться из базы"
         );

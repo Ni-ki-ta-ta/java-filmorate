@@ -40,6 +40,12 @@ public class UserDbStorage implements UserStorage {
             return ps;
         }, keyHolder);
 
+        if (keyHolder.getKey() == null) {
+            throw new IllegalStateException(
+                    "Не удалось получить id пользователя после сохранения"
+            );
+        }
+
         user.setId(keyHolder.getKey().longValue());
 
         return user;
@@ -126,6 +132,7 @@ public class UserDbStorage implements UserStorage {
         });
     }
 
+    @Override
     public void addFriend(Long userId, Long friendId) {
         String sql = """
                 MERGE INTO friends (user_id, friend_id)
@@ -136,6 +143,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sql, userId, friendId);
     }
 
+    @Override
     public void removeFriend(Long userId, Long friendId) {
         String sql = """
                 DELETE FROM friends
@@ -145,6 +153,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sql, userId, friendId);
     }
 
+    @Override
     public List<User> findFriends(Long userId) {
         String sql = """
                 SELECT u.user_id,
@@ -173,6 +182,7 @@ public class UserDbStorage implements UserStorage {
         }, userId);
     }
 
+    @Override
     public List<User> findCommonFriends(Long userId, Long otherUserId) {
         String sql = """
                 SELECT u.user_id,

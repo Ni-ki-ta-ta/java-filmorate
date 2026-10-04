@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -21,33 +20,27 @@ public class UserController {
     @GetMapping
     public List<User> findAll() {
         log.info("Получен список пользователей");
-
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public User findById(@PathVariable Long id) {
         log.info("Получен пользователь с id {}", id);
-
         return userService.findById(id);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        validateUser(user);
-
-        log.info("Добавлен пользователь: {}", user);
-
-        return userService.create(user);
+        User createdUser = userService.create(user);
+        log.info("Добавлен пользователь: {}", createdUser);
+        return createdUser;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        validateUser(user);
-
-        log.info("Обновлен пользователь: {}", user);
-
-        return userService.update(user);
+        User updatedUser = userService.update(user);
+        log.info("Обновлён пользователь: {}", updatedUser);
+        return updatedUser;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -97,15 +90,5 @@ public class UserController {
         );
 
         return userService.getCommonFriends(id, otherId);
-    }
-
-    private void validateUser(User user) {
-        if (user.getLogin().contains(" ")) {
-            log.error("Логин содержит пробелы");
-
-            throw new ValidationException(
-                    "Логин не может содержать пробелы"
-            );
-        }
     }
 }

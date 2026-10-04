@@ -30,11 +30,11 @@ class MpaDbStorageTest {
                 MERGE INTO mpa (mpa_id, name)
                 KEY (mpa_id)
                 VALUES
-                    (1, '0+'),
-                    (2, '6+'),
-                    (3, '12+'),
-                    (4, '16+'),
-                    (5, '18+')
+                    (1, 'G'),
+                    (2, 'PG'),
+                    (3, 'PG-13'),
+                    (4, 'R'),
+                    (5, 'NC-17')
                 """);
     }
 
@@ -49,59 +49,58 @@ class MpaDbStorageTest {
         );
         assertEquals(
                 1,
-                mpaList.get(0).getId(),
-                "Первый рейтинг должен иметь id 1"
+                mpaList.get(0).getId()
         );
         assertEquals(
-                "0+",
-                mpaList.get(0).getName(),
-                "Первый рейтинг должен называться «0+»"
+                "G",
+                mpaList.get(0).getName()
         );
     }
 
     @Test
     void shouldFindMpaById() {
-        Optional<Mpa> mpa = mpaDbStorage.findById(2);
+        Optional<Mpa> mpa =
+                mpaDbStorage.findById(3);
 
-        assertTrue(
-                mpa.isPresent(),
-                "Рейтинг с существующим id должен быть найден"
-        );
+        assertTrue(mpa.isPresent());
+
         assertEquals(
-                2,
-                mpa.get().getId(),
-                "Id найденного рейтинга должен совпадать"
+                3,
+                mpa.get().getId()
         );
+
         assertEquals(
-                "6+",
-                mpa.get().getName(),
-                "Название найденного рейтинга должно совпадать"
+                "PG-13",
+                mpa.get().getName()
         );
     }
 
     @Test
     void shouldReturnEmptyWhenMpaDoesNotExist() {
-        Optional<Mpa> mpa = mpaDbStorage.findById(999);
+        Optional<Mpa> mpa =
+                mpaDbStorage.findById(999);
 
-        assertFalse(
-                mpa.isPresent(),
-                "Для несуществующего рейтинга должен возвращаться Optional.empty()"
-        );
+        assertFalse(mpa.isPresent());
     }
 
     @Test
     void shouldReturnMpaInIdOrder() {
-        List<Mpa> mpaList = mpaDbStorage.findAll();
+        List<Mpa> mpaList =
+                mpaDbStorage.findAll();
 
         assertEquals(
                 1,
-                mpaList.get(0).getId(),
-                "Первый рейтинг должен иметь id 1"
+                mpaList.get(0).getId()
         );
+
         assertEquals(
                 5,
-                mpaList.get(4).getId(),
-                "Последний рейтинг должен иметь id 5"
+                mpaList.get(4).getId()
+        );
+
+        assertEquals(
+                "NC-17",
+                mpaList.get(4).getName()
         );
     }
 }

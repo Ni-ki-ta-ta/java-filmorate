@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 import java.util.Optional;
 
-@Component("genreDbStorage")
+@Repository("genreDbStorage")
 @RequiredArgsConstructor
 public class GenreDbStorage implements GenreStorage {
 
