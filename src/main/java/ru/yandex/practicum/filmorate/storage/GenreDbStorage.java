@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository("genreDbStorage")
 @RequiredArgsConstructor
@@ -48,5 +49,34 @@ public class GenreDbStorage implements GenreStorage {
                 },
                 id
         ).stream().findFirst();
+    }
+
+    @Override
+    public List<Genre> findByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        String placeholders = ids.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = """
+                SELECT genre_id, name
+                FROM genres
+                WHERE genre_id IN (%s)
+                ORDER BY genre_id
+                """.formatted(placeholders);
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> {
+                    Genre genre = new Genre();
+                    genre.setId(rs.getInt("genre_id"));
+                    genre.setName(rs.getString("name"));
+                    return genre;
+                },
+                ids.toArray()
+        );
     }
 }

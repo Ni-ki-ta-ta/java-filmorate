@@ -22,6 +22,25 @@ public class GenreService {
 
     public Genre findById(Integer id) {
         return genreStorage.findById(id)
-                .orElseThrow(() -> new NotFoundException("Жанр не найден"));
+                .orElseThrow(() ->
+                        new NotFoundException("Жанр с id " + id + " не найден"));
+    }
+
+    public List<Genre> findByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        List<Integer> uniqueIds = ids.stream()
+                .distinct()
+                .toList();
+
+        List<Genre> genres = genreStorage.findByIds(uniqueIds);
+
+        if (genres.size() < uniqueIds.size()) {
+            throw new NotFoundException("Один или несколько жанров не найдены");
+        }
+
+        return genres;
     }
 }

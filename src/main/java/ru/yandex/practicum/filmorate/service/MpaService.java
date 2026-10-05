@@ -22,6 +22,7 @@ public class MpaService {
 
     public Mpa findById(Integer id) {
         return mpaStorage.findById(id)
-                .orElseThrow(() -> new NotFoundException("Рейтинг MPA не найден"));
+                .orElseThrow(() ->
+                        new NotFoundException("Рейтинг MPA с id " + id + " не найден"));
     }
 }

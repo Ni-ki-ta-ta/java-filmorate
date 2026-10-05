@@ -91,6 +91,34 @@ class GenreDbStorageTest {
     }
 
     @Test
+    void shouldFindGenresByIds() {
+        List<Genre> genres = genreDbStorage.findByIds(
+                List.of(1, 3, 6)
+        );
+
+        assertEquals(
+                3,
+                genres.size(),
+                "Должны вернуться три жанра"
+        );
+
+        assertEquals(
+                1,
+                genres.get(0).getId()
+        );
+
+        assertEquals(
+                3,
+                genres.get(1).getId()
+        );
+
+        assertEquals(
+                6,
+                genres.get(2).getId()
+        );
+    }
+
+    @Test
     void shouldReturnGenresInIdOrder() {
         List<Genre> genres = genreDbStorage.findAll();
 
