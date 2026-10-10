@@ -34,14 +34,10 @@ class DeleteEndpointsTest {
     private JdbcTemplate jdbcTemplate;
 
     private long createUser() throws Exception {
-        String json = """
-                {
-                    "email": "delete-test@example.com",
-                    "login": "delete_test",
-                    "name": "Test User",
-                    "birthday": "2000-01-01"
-                }
-                """;
+        String json = "{\"email\":\"delete-test@example.com\","
+                + "\"login\":\"delete_test\","
+                + "\"name\":\"Test User\","
+                + "\"birthday\":\"2000-01-01\"}";
 
         String response = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -56,17 +52,11 @@ class DeleteEndpointsTest {
     }
 
     private long createFilm() throws Exception {
-        String json = """
-                {
-                    "name": "Delete Test Film",
-                    "description": "Film for deletion test",
-                    "releaseDate": "2020-01-01",
-                    "duration": 120,
-                    "mpa": {
-                        "id": 1
-                    }
-                }
-                """;
+        String json = "{\"name\":\"Delete Test Film\","
+                + "\"description\":\"Film for deletion test\","
+                + "\"releaseDate\":\"2020-01-01\","
+                + "\"duration\":120,"
+                + "\"mpa\":{\"id\":1}}";
 
         String response = mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
