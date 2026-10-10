@@ -53,6 +53,11 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
+    public void delete(Long filmId) {
+        findById(filmId);
+        filmStorage.delete(filmId);
+    }
+
     public Film findById(Long id) {
         return filmStorage.findById(id)
                 .orElseThrow(() ->
