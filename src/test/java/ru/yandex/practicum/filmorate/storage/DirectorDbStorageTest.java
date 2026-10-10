@@ -6,12 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorRowMapper;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.List;
 
@@ -23,7 +20,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class DirectorDbStorageTest {
     private final DirectorDbStorage directorStorage;
-    private final JdbcTemplate jdbcTemplate;
 
     @Test
     void shouldCreateAndReturnDirector() {
