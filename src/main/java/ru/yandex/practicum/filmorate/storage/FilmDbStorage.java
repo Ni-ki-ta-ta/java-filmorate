@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.io.DataInput;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
