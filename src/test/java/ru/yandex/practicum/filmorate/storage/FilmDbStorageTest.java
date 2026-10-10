@@ -8,15 +8,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
@@ -51,6 +50,14 @@ class FilmDbStorageTest {
                     (4, 'Триллер'),
                     (5, 'Документальный'),
                     (6, 'Боевик')
+                """);
+
+        jdbcTemplate.update("""
+                MERGE INTO directors (director_id, name)
+                KEY (director_id)
+                VALUES
+                    (101, 'Christopher Nolan'),
+                    (102, 'Guy Ritchie')
                 """);
     }
 
@@ -111,6 +118,8 @@ class FilmDbStorageTest {
 
     @Test
     void shouldFindFilmById() {
+
+
         Film savedFilm = filmDbStorage.create(createFilm("Тестовый фильм"));
 
         Optional<Film> foundFilm = filmDbStorage.findById(savedFilm.getId());
@@ -138,6 +147,11 @@ class FilmDbStorageTest {
                 2,
                 foundFilm.get().getGenres().size(),
                 "Жанры фильма должны загружаться из базы"
+        );
+        assertEquals(
+                2,
+                foundFilm.get().getDirector().size(),
+                "Режисёры фильма должны загружаться из базы"
         );
     }
 
@@ -262,6 +276,14 @@ class FilmDbStorageTest {
 
         film.setGenres(List.of(comedy, drama));
 
+        Director director1 = new Director();
+        director1.setId(101);
+
+        Director director2 = new Director();
+        director2.setId(102);
+
+        film.setDirector(List.of(director1, director2));
+
         return film;
     }
 
@@ -296,5 +318,78 @@ class FilmDbStorageTest {
         user.setId(userId);
 
         return user;
+    }
+
+    @Test
+    void shouldFindDirectorFilmsSortedByYear() {
+        Film newer = createFilm("Новый фильм");
+        newer.setReleaseDate(LocalDate.of(2020, 1, 1));
+        filmDbStorage.create(newer);
+
+        Film older = createFilm("Старый фильм");
+        older.setReleaseDate(LocalDate.of(1990, 1, 1));
+        filmDbStorage.create(older);
+
+        Film middle = createFilm("Средний фильм");
+        middle.setReleaseDate(LocalDate.of(2005, 1, 1));
+        filmDbStorage.create(middle);
+
+        // Этот фильм не должен попасть в выборку.
+        Film unrelated = createFilm("Без режиссёра");
+        unrelated.setDirector(List.of());
+        filmDbStorage.create(unrelated);
+
+        List<Film> films = filmDbStorage.findByDirector(
+                101,
+                DirectorFilmsSortBy.YEAR
+        );
+
+        assertThat(films)
+                .extracting(Film::getId)
+                .containsExactly(
+                        older.getId(),
+                        middle.getId(),
+                        newer.getId()
+                );
+    }
+
+    @Test
+    void shouldFindDirectorFilmsSortedByLikes() {
+        Film withoutLikes = filmDbStorage.create(
+                createFilm("Без лайков")
+        );
+        Film mostLiked = filmDbStorage.create(
+                createFilm("Два лайка")
+        );
+        Film lessLiked = filmDbStorage.create(
+                createFilm("Один лайк")
+        );
+
+        User firstUser = createUser();
+        User secondUser = createUser();
+
+        filmDbStorage.addLike(mostLiked.getId(), firstUser.getId());
+        filmDbStorage.addLike(mostLiked.getId(), secondUser.getId());
+        filmDbStorage.addLike(lessLiked.getId(), firstUser.getId());
+
+        Film unrelated = createFilm("Без режиссёра");
+        unrelated.setDirector(List.of());
+        filmDbStorage.create(unrelated);
+
+        filmDbStorage.addLike(unrelated.getId(), firstUser.getId());
+        filmDbStorage.addLike(unrelated.getId(), secondUser.getId());
+
+        List<Film> films = filmDbStorage.findByDirector(
+                101,
+                DirectorFilmsSortBy.LIKES
+        );
+
+        assertThat(films)
+                .extracting(Film::getId)
+                .containsExactly(
+                        mostLiked.getId(),
+                        lessLiked.getId(),
+                        withoutLikes.getId()
+                );
     }
 }

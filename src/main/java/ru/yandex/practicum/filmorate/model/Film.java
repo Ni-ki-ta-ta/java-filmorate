@@ -35,4 +35,6 @@ public class Film {
     private List<Genre> genres = new ArrayList<>();
 
     private Set<Long> likes = new HashSet<>();
+
+    private List<Director> director = new ArrayList<>();
 }
