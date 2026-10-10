@@ -3,14 +3,18 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +30,9 @@ public class FilmService {
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
+    private final DirectorService directorService;
+    private final DirectorDbStorage directorStorage;
+
     private final GenreService genreService;
     private final MpaService mpaService;
 
@@ -37,6 +44,7 @@ public class FilmService {
         validateFilm(film);
         validateMpa(film);
         validateGenres(film);
+        validateDirectors(film);
 
         return filmStorage.create(film);
     }
@@ -45,6 +53,7 @@ public class FilmService {
         validateFilm(film);
         validateMpa(film);
         validateGenres(film);
+        validateDirectors(film);
 
         if (film.getId() == null || filmStorage.findById(film.getId()).isEmpty()) {
             throw new NotFoundException("Фильм не найден");
@@ -63,12 +72,6 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException(
                     "Дата релиза не может быть раньше 28 декабря 1895 года"
-            );
-        }
-
-        if (film.getReleaseDate().isAfter(LocalDate.now())) {
-            throw new ValidationException(
-                    "Дата релиза фильма не может быть в будущем"
             );
         }
     }
@@ -96,6 +99,21 @@ public class FilmService {
                 .toList();
 
         genreService.findByIds(genreIds);
+    }
+
+    private void validateDirectors(Film film) {
+        if (film.getDirectors() == null) {
+            film.setDirectors(new ArrayList<>());
+            return;
+        }
+
+        for (Director director : film.getDirectors()) {
+            if ((director == null) || (director.getId() == null)) {
+                throw new ValidationException("id режисёра не указано");
+            }
+            directorService.findById(director.getId());
+        }
+
     }
 
     public void addLike(Long filmId, Long userId) {
@@ -126,5 +144,12 @@ public class FilmService {
         }
 
         return filmStorage.findPopular(count);
+    }
+
+    public List<Film> getDirectorFilms(Integer directorId, DirectorFilmsSortBy sortBy) {
+        if ((directorId == null) || directorStorage.findById(directorId).isEmpty()) {
+            throw new NotFoundException("Режисёр с id: " + directorId + " не найден");
+        }
+        return filmStorage.findByDirector(directorId, sortBy);
     }
 }

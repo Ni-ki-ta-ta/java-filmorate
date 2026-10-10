@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -67,5 +69,19 @@ public class FilmController {
     ) {
         log.info("Запрошен список популярных фильмов, count={}", count);
         return filmService.findPopular(count);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilms(
+            @PathVariable Integer directorId,
+            @RequestParam String sortBy
+            ) {
+        DirectorFilmsSortBy sorting = switch (sortBy) {
+            case "year" -> DirectorFilmsSortBy.YEAR;
+            case "likes" -> DirectorFilmsSortBy.LIKES;
+            default -> throw new ValidationException("Должно быть указано либо year либо likes");
+        };
+
+        return filmService.getDirectorFilms(directorId, sorting);
     }
 }
