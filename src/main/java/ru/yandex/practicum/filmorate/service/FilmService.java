@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -19,6 +19,8 @@ public class FilmService {
 
     private static final LocalDate CINEMA_BIRTHDAY =
             LocalDate.of(1895, 12, 28);
+
+    private final EventStorage eventStorage;
 
     @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
@@ -103,9 +105,21 @@ public class FilmService {
 
         userStorage.findById(userId)
                 .orElseThrow(() ->
-                        new NotFoundException("Пользователь с id " + userId + " не найден"));
+                        new NotFoundException(
+                                "Пользователь с id " + userId + " не найден"
+                        ));
 
-        filmStorage.addLike(filmId, userId);
+        if (!filmStorage.hasLike(filmId, userId)) {
+            filmStorage.addLike(filmId, userId);
+            eventStorage.addEvent(new Event(
+                    null,
+                    System.currentTimeMillis(),
+                    userId,
+                    EventType.LIKE,
+                    Operation.ADD,
+                    filmId
+            ));
+        }
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -113,9 +127,21 @@ public class FilmService {
 
         userStorage.findById(userId)
                 .orElseThrow(() ->
-                        new NotFoundException("Пользователь с id " + userId + " не найден"));
+                        new NotFoundException(
+                                "Пользователь с id " + userId + " не найден"
+                        ));
 
-        filmStorage.removeLike(filmId, userId);
+        if (filmStorage.hasLike(filmId, userId)) {
+            filmStorage.removeLike(filmId, userId);
+            eventStorage.addEvent(new Event(
+                    null,
+                    System.currentTimeMillis(),
+                    userId,
+                    EventType.LIKE,
+                    Operation.REMOVE,
+                    filmId
+            ));
+        }
     }
 
     public List<Film> findPopular(int count) {
