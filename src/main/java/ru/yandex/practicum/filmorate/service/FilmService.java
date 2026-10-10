@@ -152,4 +152,25 @@ public class FilmService {
         }
         return filmStorage.findByDirector(directorId, sortBy);
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        if (query == null || query.isBlank()) {
+            throw new ValidationException("Поисковый запрос не может быть пустым");
+        }
+
+        if (by == null || by.isBlank()) {
+            throw new ValidationException("Не указан тип поиска");
+        }
+
+        List<String> searchBy = List.of(by.split(",", -1));
+
+        if (searchBy.size() > 2
+                || searchBy.stream().anyMatch(value ->
+                !value.equals("title") && !value.equals("director"))
+                || searchBy.stream().distinct().count() != searchBy.size()) {
+            throw new ValidationException("Недопустимый тип поиска: " + by);
+        }
+
+        return filmStorage.searchFilms(query, searchBy);
+    }
 }

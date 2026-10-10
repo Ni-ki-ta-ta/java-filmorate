@@ -463,4 +463,88 @@ public class FilmDbStorage implements FilmStorage {
 
         return films;
     }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> searchBy) {
+        boolean searchTitle = searchBy.contains("title");
+        boolean searchDirector = searchBy.contains("director");
+
+        String searchCondition;
+
+        if (searchTitle && searchDirector) {
+            searchCondition = """
+                LOWER(f.name) LIKE ? ESCAPE '\\' OR EXISTS (
+                    SELECT 1
+                    FROM film_directors fd
+                    JOIN directors d ON d.director_id = fd.director_id
+                    WHERE fd.film_id = f.film_id
+                      AND LOWER(d.name) LIKE ? ESCAPE '\\'
+                )
+                """;
+        } else if (searchTitle) {
+            searchCondition = "LOWER(f.name) LIKE ? ESCAPE '\\'";
+        } else {
+            searchCondition = """
+                EXISTS (
+                    SELECT 1
+                    FROM film_directors fd
+                    JOIN directors d ON d.director_id = fd.director_id
+                    WHERE fd.film_id = f.film_id
+                      AND LOWER(d.name) LIKE ? ESCAPE '\\'
+                )
+                """;
+        }
+
+        String sql = """
+            SELECT f.film_id,
+                   f.name,
+                   f.description,
+                   f.release_date,
+                   f.duration,
+                   m.mpa_id,
+                   m.name AS mpa_name,
+                   COUNT(fl.user_id) AS likes_count
+            FROM films f
+            JOIN mpa m ON f.mpa_id = m.mpa_id
+            LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE %s
+            GROUP BY f.film_id,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration,
+                     m.mpa_id,
+                     m.name
+            ORDER BY likes_count DESC, f.film_id ASC
+            """.formatted(searchCondition);
+
+        String escapedQuery = query.toLowerCase(java.util.Locale.ROOT)
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+
+        String searchQuery = "%" + escapedQuery + "%";
+
+        List<Film> films;
+
+        if (searchTitle && searchDirector) {
+            films = jdbcTemplate.query(
+                    sql,
+                    (rs, rowNum) -> mapFilm(rs),
+                    searchQuery,
+                    searchQuery
+            );
+        } else {
+            films = jdbcTemplate.query(
+                    sql,
+                    (rs, rowNum) -> mapFilm(rs),
+                    searchQuery
+            );
+        }
+
+        fillGenres(films);
+        fillDirectors(films);
+
+        return films;
+    }
 }
