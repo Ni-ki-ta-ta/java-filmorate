@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface FilmStorage {
     void removeLike(Long filmId, Long userId);
 
     List<Film> findPopular(int count);
+
+    List<Film> findByDirector(Integer directorId, DirectorFilmsSortBy sortBy);
+
+    List<Film> searchFilms(String query, List<String> searchBy);
 }
