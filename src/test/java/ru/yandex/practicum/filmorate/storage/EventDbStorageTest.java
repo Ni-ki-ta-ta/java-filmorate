@@ -107,7 +107,7 @@ class EventDbStorageTest {
     }
 
     @Test
-    void shouldSortEventsByTimestampDescending() {
+    void shouldSortEventsByTimestampAscending() {
         Long userId = createUser();
 
         Event oldEvent = eventDbStorage.addEvent(
@@ -127,12 +127,12 @@ class EventDbStorageTest {
 
         assertEquals(3, events.size(),
                 "Должны вернуться все три события");
-        assertEquals(newEvent.getEventId(), events.get(0).getEventId(),
-                "Сначала должно идти самое новое событие");
+        assertEquals(oldEvent.getEventId(), events.get(0).getEventId(),
+                "Сначала должно идти самое старое событие");
         assertEquals(middleEvent.getEventId(), events.get(1).getEventId(),
                 "Вторым должно идти событие со средним временем");
-        assertEquals(oldEvent.getEventId(), events.get(2).getEventId(),
-                "Последним должно идти самое старое событие");
+        assertEquals(newEvent.getEventId(), events.get(2).getEventId(),
+                "Последним должно идти самое новое событие");
     }
 
     @Test
