@@ -1,4 +1,3 @@
-
 package ru.yandex.practicum.filmorate.service;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,12 +36,8 @@ class EventServiceTest {
         user.setId(userId);
 
         Event event = new Event(
-                1L,
-                1000L,
-                userId,
-                EventType.LIKE,
-                Operation.ADD,
-                10L
+                1L, 1000L, userId,
+                EventType.LIKE, Operation.ADD, 10L
         );
 
         when(userStorage.findById(userId)).thenReturn(Optional.of(user));
@@ -50,16 +45,11 @@ class EventServiceTest {
 
         List<Event> result = eventService.getFeed(userId);
 
-        assertEquals(
-                1,
-                result.size(),
-                "Лента должна содержать одно событие"
-        );
-        assertEquals(
-                event,
-                result.get(0),
-                "Лента должна содержать событие, возвращённое хранилищем"
-        );
+        assertEquals(1, result.size(),
+                "Лента должна содержать одно событие");
+        assertEquals(event, result.get(0),
+                "Лента должна содержать событие, возвращённое хранилищем");
+
         verify(eventStorage).findByUserId(userId);
     }
 
@@ -74,10 +64,8 @@ class EventServiceTest {
 
         List<Event> result = eventService.getFeed(userId);
 
-        assertTrue(
-                result.isEmpty(),
-                "Лента должна быть пустой, если у пользователя нет событий"
-        );
+        assertTrue(result.isEmpty(),
+                "Лента должна быть пустой, если у пользователя нет событий");
         verify(eventStorage).findByUserId(userId);
     }
 
@@ -87,11 +75,9 @@ class EventServiceTest {
 
         when(userStorage.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(
-                NotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> eventService.getFeed(userId),
-                "Для несуществующего пользователя должно выбрасываться исключение"
-        );
+                "Для несуществующего пользователя должно выбрасываться исключение");
 
         verify(eventStorage, never()).findByUserId(userId);
     }

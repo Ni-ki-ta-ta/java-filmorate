@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -18,12 +22,15 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     public Review create(Review review) {
         checkUserExists(review.getUserId());
         checkFilmExists(review.getFilmId());
 
-        return reviewStorage.create(review);
+        Review createdReview = reviewStorage.create(review);
+        addReviewEvent(createdReview, Operation.ADD);
+        return createdReview;
     }
 
     public Review update(Review review) {
@@ -33,12 +40,15 @@ public class ReviewService {
 
         findById(review.getReviewId());
 
-        return reviewStorage.update(review);
+        Review updatedReview = reviewStorage.update(review);
+        addReviewEvent(updatedReview, Operation.UPDATE);
+        return updatedReview;
     }
 
     public void delete(Long id) {
-        findById(id);
+        Review review = findById(id);
         reviewStorage.delete(id);
+        addReviewEvent(review, Operation.REMOVE);
     }
 
     public Review findById(Long id) {
@@ -101,5 +111,18 @@ public class ReviewService {
         filmStorage.findById(filmId)
                 .orElseThrow(() ->
                         new NotFoundException("Фильм с id " + filmId + " не найден"));
+    }
+
+    private void addReviewEvent(Review review, Operation operation) {
+        Event event = new Event(
+                null,
+                System.currentTimeMillis(),
+                review.getUserId(),
+                EventType.REVIEW,
+                operation,
+                review.getReviewId()
+        );
+
+        eventStorage.addEvent(event);
     }
 }
