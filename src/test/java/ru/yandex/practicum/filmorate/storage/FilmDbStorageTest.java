@@ -243,6 +243,114 @@ class FilmDbStorageTest {
         );
     }
 
+    @Test
+    void shouldFindCommonFilms() {
+        User firstUser = createUser();
+        User secondUser = createUser();
+        Film firstFilm = filmDbStorage.create(createFilm("Первый фильм"));
+        Film secondFilm = filmDbStorage.create(createFilm("Второй фильм"));
+        Film thirdFilm = filmDbStorage.create(createFilm("Третий фильм"));
+
+        filmDbStorage.addLike(firstFilm.getId(), firstUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), firstUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), secondUser.getId());
+        filmDbStorage.addLike(thirdFilm.getId(), secondUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.findCommon(
+                firstUser.getId(),
+                secondUser.getId()
+        );
+
+        assertEquals(
+                1,
+                commonFilms.size(),
+                "Должен вернуться только фильм, который лайкнули оба пользователя"
+        );
+        assertEquals(
+                secondFilm.getId(),
+                commonFilms.get(0).getId(),
+                "Общим должен быть второй фильм"
+        );
+    }
+
+    @Test
+    void shouldSortCommonFilmsByPopularity() {
+        User firstUser = createUser();
+        User secondUser = createUser();
+        User thirdUser = createUser();
+        Film firstFilm = filmDbStorage.create(createFilm("Первый фильм"));
+        Film secondFilm = filmDbStorage.create(createFilm("Второй фильм"));
+
+        filmDbStorage.addLike(firstFilm.getId(), firstUser.getId());
+        filmDbStorage.addLike(firstFilm.getId(), secondUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), firstUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), secondUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), thirdUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.findCommon(
+                firstUser.getId(),
+                secondUser.getId()
+        );
+
+        assertEquals(
+                2,
+                commonFilms.size(),
+                "Должны вернуться оба общих фильма"
+        );
+        assertEquals(
+                secondFilm.getId(),
+                commonFilms.get(0).getId(),
+                "Первым должен быть фильм с большим количеством лайков"
+        );
+        assertEquals(
+                firstFilm.getId(),
+                commonFilms.get(1).getId(),
+                "Вторым должен быть фильм с меньшим количеством лайков"
+        );
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoCommonFilms() {
+        User firstUser = createUser();
+        User secondUser = createUser();
+        Film firstFilm = filmDbStorage.create(createFilm("Первый фильм"));
+        Film secondFilm = filmDbStorage.create(createFilm("Второй фильм"));
+
+        filmDbStorage.addLike(firstFilm.getId(), firstUser.getId());
+        filmDbStorage.addLike(secondFilm.getId(), secondUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.findCommon(
+                firstUser.getId(),
+                secondUser.getId()
+        );
+
+        assertTrue(
+                commonFilms.isEmpty(),
+                "Если общих лайков нет, список должен быть пустым"
+        );
+    }
+
+    @Test
+    void shouldFillGenresInCommonFilms() {
+        User firstUser = createUser();
+        User secondUser = createUser();
+        Film film = filmDbStorage.create(createFilm("Тестовый фильм"));
+
+        filmDbStorage.addLike(film.getId(), firstUser.getId());
+        filmDbStorage.addLike(film.getId(), secondUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.findCommon(
+                firstUser.getId(),
+                secondUser.getId()
+        );
+
+        assertEquals(
+                2,
+                commonFilms.get(0).getGenres().size(),
+                "У общего фильма должны быть заполнены жанры"
+        );
+    }
+
     private Film createFilm(String name) {
         Film film = new Film();
         film.setName(name);
@@ -297,4 +405,6 @@ class FilmDbStorageTest {
 
         return user;
     }
+
+
 }

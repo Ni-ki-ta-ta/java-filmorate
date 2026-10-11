@@ -127,4 +127,15 @@ public class FilmService {
 
         return filmStorage.findPopular(count);
     }
+
+    public List<Film> findCommon(Long userId, Long friendId) {
+        userStorage.findById(userId)
+                .orElseThrow(() ->
+                        new NotFoundException("Пользователь с id " + userId + " не найден"));
+        userStorage.findById(friendId)
+                .orElseThrow(() ->
+                        new NotFoundException("Пользователь с id " + friendId + " не найден"));
+
+        return filmStorage.findCommon(userId, friendId);
+    }
 }
