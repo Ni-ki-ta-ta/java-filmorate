@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -43,6 +45,14 @@ public class FilmController {
         return updatedFilm;
     }
 
+
+    @DeleteMapping("/{filmId}")
+    public void delete(@PathVariable("filmId") Long filmId) {
+        log.info("Удалён фильм с id {}", filmId);
+        filmService.delete(filmId);
+    }
+
+
     @PutMapping("/{id}/like/{userId}")
     public void addLike(
             @PathVariable Long id,
@@ -63,9 +73,34 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> findPopular(
-            @RequestParam(defaultValue = "10") int count
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year
     ) {
         log.info("Запрошен список популярных фильмов, count={}", count);
-        return filmService.findPopular(count);
+        return filmService.findPopular(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilms(
+            @PathVariable Integer directorId,
+            @RequestParam String sortBy
+            ) {
+        DirectorFilmsSortBy sorting = switch (sortBy) {
+            case "year" -> DirectorFilmsSortBy.YEAR;
+            case "likes" -> DirectorFilmsSortBy.LIKES;
+            default -> throw new ValidationException("Должно быть указано либо year либо likes");
+        };
+
+        return filmService.getDirectorFilms(directorId, sorting);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilms(
+            @RequestParam("query") String query,
+            @RequestParam("by") String by
+    ) {
+        log.info("Поиск фильмов: query={}, by={}", query, by);
+        return filmService.searchFilms(query, by);
     }
 }
