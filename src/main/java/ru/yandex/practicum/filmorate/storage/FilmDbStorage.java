@@ -392,6 +392,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> findPopular(int count) {
+        return findPopular(count, null, null);
+    }
+
+    @Override
     public List<Film> findPopular(int count, Integer genreId, Integer year) {
         String sql = """
                 SELECT f.film_id,
