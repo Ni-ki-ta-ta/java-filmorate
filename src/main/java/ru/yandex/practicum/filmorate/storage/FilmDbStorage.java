@@ -392,33 +392,43 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> findPopular(int count) {
+    public List<Film> findPopular(int count, Integer genreId, Integer year) {
         String sql = """
                 SELECT f.film_id,
-                       f.name,
-                       f.description,
-                       f.release_date,
-                       f.duration,
-                       m.mpa_id,
-                       m.name AS mpa_name,
-                       COUNT(fl.user_id) AS likes_count
-                FROM films f
-                JOIN mpa m ON f.mpa_id = m.mpa_id
-                LEFT JOIN film_likes fl ON f.film_id = fl.film_id
-                GROUP BY f.film_id,
-                         f.name,
-                         f.description,
-                         f.release_date,
-                         f.duration,
-                         m.mpa_id,
-                         m.name
-                ORDER BY likes_count DESC, f.film_id
-                LIMIT ?
-                """;
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               m.mpa_id,
+               m.name AS mpa_name,
+               COUNT(fl.user_id) AS likes_count
+            FROM films f
+            JOIN mpa m ON f.mpa_id = m.mpa_id
+            LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE (? IS NULL OR EXISTS (
+                SELECT 1
+                FROM film_genres fg
+                WHERE fg.film_id = f.film_id
+                  AND fg.genre_id = ?
+            ))
+              AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+            GROUP BY f.film_id,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration,
+                     m.mpa_id,
+                     m.name
+            ORDER BY likes_count DESC, f.film_id
+            LIMIT ?
+            """;
 
         List<Film> films = jdbcTemplate.query(
                 sql,
+
                 (rs, rowNum) -> mapFilm(rs),
+                genreId, genreId,
+                year, year,
                 count
         );
 

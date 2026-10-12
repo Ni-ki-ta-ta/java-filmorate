@@ -186,7 +186,7 @@ class FilmDbStorageTest {
 
         filmDbStorage.addLike(film.getId(), user.getId());
 
-        List<Film> popularFilms = filmDbStorage.findPopular(10);
+        List<Film> popularFilms = filmDbStorage.findPopular(10, null, null);
 
         assertEquals(
                 1,
@@ -238,7 +238,7 @@ class FilmDbStorageTest {
         filmDbStorage.addLike(secondFilm.getId(), firstUser.getId());
         filmDbStorage.addLike(secondFilm.getId(), secondUser.getId());
 
-        List<Film> popularFilms = filmDbStorage.findPopular(2);
+        List<Film> popularFilms = filmDbStorage.findPopular(2, null, null);
 
         assertEquals(
                 2,

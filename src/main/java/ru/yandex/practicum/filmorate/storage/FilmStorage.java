@@ -25,6 +25,7 @@ public interface FilmStorage {
     boolean hasLike(Long filmId, Long userId);
 
     List<Film> findPopular(int count);
+    List<Film> findPopular(int count, Integer genreId, Integer year);
 
     List<Film> findByDirector(Integer directorId, DirectorFilmsSortBy sortBy);
 
