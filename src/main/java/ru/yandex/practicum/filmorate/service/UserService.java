@@ -40,6 +40,11 @@ public class UserService {
         return userStorage.update(user);
     }
 
+    public void delete(Long userId) {
+        findById(userId);
+        userStorage.delete(userId);
+    }
+
     public User findById(Long id) {
         return userStorage.findById(id)
                 .orElseThrow(() -> new NotFoundException(
