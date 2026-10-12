@@ -584,6 +584,7 @@ public class FilmDbStorage implements FilmStorage {
         );
 
         return count != null && count > 0;
+    }
 
     public List<Long> findLikedFilmIds(Long userId) {
         String sql = """
