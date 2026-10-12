@@ -584,5 +584,19 @@ public class FilmDbStorage implements FilmStorage {
         );
 
         return count != null && count > 0;
+
+    public List<Long> findLikedFilmIds(Long userId) {
+        String sql = """
+            SELECT film_id
+            FROM film_likes
+            WHERE user_id = ?
+            ORDER BY film_id
+            """;
+
+        return jdbcTemplate.queryForList(
+                sql,
+                Long.class,
+                userId
+        );
     }
 }
