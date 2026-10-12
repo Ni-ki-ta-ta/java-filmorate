@@ -141,14 +141,14 @@ public class FilmService {
         filmStorage.removeLike(filmId, userId);
     }
 
-    public List<Film> findPopular(int count) {
+    public List<Film> findPopular(int count, Integer genreId, Integer year) {
         if (count <= 0) {
             throw new ValidationException(
                     "Количество популярных фильмов должно быть больше 0"
             );
         }
 
-        return filmStorage.findPopular(count);
+        return filmStorage.findPopular(count, genreId, year);
     }
 
     public List<Film> getDirectorFilms(Integer directorId, DirectorFilmsSortBy sortBy) {
