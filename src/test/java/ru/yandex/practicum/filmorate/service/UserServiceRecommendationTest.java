@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @Import({
         UserDbStorage.class,
-        FilmDbStorage.class
+        FilmDbStorage.class,
+        EventDbStorage.class
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserServiceRecommendationTest {
@@ -33,10 +35,11 @@ class UserServiceRecommendationTest {
     private final JdbcTemplate jdbcTemplate;
 
     private UserService userService;
+    private final EventDbStorage eventDbStorage;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userDbStorage, filmDbStorage);
+        userService = new UserService(userDbStorage, eventDbStorage, filmDbStorage);
 
         jdbcTemplate.update("""
                 MERGE INTO mpa (mpa_id, name)

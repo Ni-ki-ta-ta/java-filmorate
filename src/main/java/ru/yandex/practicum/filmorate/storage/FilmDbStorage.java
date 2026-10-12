@@ -392,6 +392,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> findPopular(int count) {
+        return findPopular(count, null, null);
+    }
+
+    @Override
     public List<Film> findPopular(int count, Integer genreId, Integer year) {
         String sql = """
                 SELECT f.film_id,
@@ -564,6 +569,23 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public boolean hasLike(Long filmId, Long userId) {
+        String sql = """
+            SELECT COUNT(*)
+            FROM film_likes
+            WHERE film_id = ? AND user_id = ?
+            """;
+
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                filmId,
+                userId
+        );
+
+        return count != null && count > 0;
+    }
+
     public List<Long> findLikedFilmIds(Long userId) {
         String sql = """
             SELECT film_id
