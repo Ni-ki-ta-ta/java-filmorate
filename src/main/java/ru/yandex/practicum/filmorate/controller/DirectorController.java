@@ -1,43 +1,53 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.service.DirectorService;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 
 import java.util.List;
 
-@RestController
+@Service
 @RequiredArgsConstructor
-@RequestMapping("/directors")
-public class DirectorController {
-    private final DirectorService directorService;
+public class DirectorService {
+    private final DirectorDbStorage directorDbStorage;
 
-    @GetMapping
     public List<Director> findAll() {
-        return directorService.findAll();
+        return directorDbStorage.findAll();
     }
 
-    @GetMapping("/{id}")
-    public Director findById(@PathVariable Integer id) {
-        return directorService.findById(id);
+    public Director findById(Integer id) {
+        return directorDbStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Режисёра с id: " + id + " не найдено"));
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Director create(@RequestBody Director director) {
-        return directorService.create(director);
+    public Director create(Director director) {
+        validateName(director.getName());
+        return directorDbStorage.create(director);
     }
 
-    @PutMapping
-    public Director update(@RequestBody Director director) {
-        return directorService.update(director);
+    public Director update(Director director) {
+        validateId(director.getId());
+        validateName(director.getName());
+        return directorDbStorage.update(director);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Integer id) {
-        directorService.delete(id);
+    private void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new ValidationException("Имя режиссёра не может быть пустым");
+        }
+    }
+
+    public void delete(Integer id) {
+        validateId(id);
+        directorDbStorage.delete(id);
+    }
+
+    private void validateId(Integer id) {
+        if ((id == null) || (directorDbStorage.findById(id).isEmpty())) {
+            throw new NotFoundException("Режисёр не найден");
+        }
     }
 }
