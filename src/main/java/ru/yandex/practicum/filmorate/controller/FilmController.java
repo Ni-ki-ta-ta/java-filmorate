@@ -103,4 +103,13 @@ public class FilmController {
         log.info("Поиск фильмов: query={}, by={}", query, by);
         return filmService.searchFilms(query, by);
     }
+
+    @GetMapping("/common")
+    public List<Film> findCommon(
+            @RequestParam Long userId,
+            @RequestParam Long friendId
+    ) {
+        log.info("Запрошены общие фильмы пользователей {} и {}", userId, friendId);
+        return filmService.findCommon(userId, friendId);
+    }
 }
