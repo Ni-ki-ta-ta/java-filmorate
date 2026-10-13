@@ -505,14 +505,14 @@ public class FilmDbStorage implements FilmStorage {
                      f.duration, m.mpa_id, m.name
             ORDER BY likes_count DESC, f.film_id
             """;
-                
+
         List<Film> films = jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> mapFilm(rs),
                 userId,
                 friendId
         );
-                
+
         fillGenres(films);
         fillDirectors(films);
 
@@ -573,16 +573,16 @@ public class FilmDbStorage implements FilmStorage {
                      m.name
             ORDER BY likes_count DESC, f.film_id ASC
             """.formatted(searchCondition);
-            
+
         String escapedQuery = query.toLowerCase(java.util.Locale.ROOT)
                 .replace("\\", "\\\\")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
 
         String searchQuery = "%" + escapedQuery + "%";
-            
+
         List<Film> films;
-            
+
         if (searchTitle && searchDirector) {
             films = jdbcTemplate.query(
                     sql,
@@ -597,13 +597,13 @@ public class FilmDbStorage implements FilmStorage {
                     searchQuery
             );
         }
-            
+
         fillGenres(films);
         fillDirectors(films);
-            
+
         return films;
     }
-            
+
     @Override
     public boolean hasLike(Long filmId, Long userId) {
         String sql = """
@@ -618,11 +618,11 @@ public class FilmDbStorage implements FilmStorage {
                 filmId,
                 userId
         );
-            
+
         return count != null && count > 0;
 
     }
-            
+
     public List<Long> findLikedFilmIds(Long userId) {
         String sql = """
             SELECT film_id
@@ -630,7 +630,7 @@ public class FilmDbStorage implements FilmStorage {
             WHERE user_id = ?
             ORDER BY film_id
             """;
-            
+
         return jdbcTemplate.queryForList(
                 sql,
                 Long.class,
