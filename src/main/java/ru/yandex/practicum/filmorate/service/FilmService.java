@@ -133,15 +133,16 @@ public class FilmService {
 
         if (!filmStorage.hasLike(filmId, userId)) {
             filmStorage.addLike(filmId, userId);
-            eventStorage.addEvent(new Event(
-                    null,
-                    System.currentTimeMillis(),
-                    userId,
-                    EventType.LIKE,
-                    Operation.ADD,
-                    filmId
-            ));
         }
+
+        eventStorage.addEvent(new Event(
+                null,
+                System.currentTimeMillis(),
+                userId,
+                EventType.LIKE,
+                Operation.ADD,
+                filmId
+        ));
     }
 
     public void removeLike(Long filmId, Long userId) {
