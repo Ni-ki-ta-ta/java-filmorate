@@ -58,6 +58,7 @@ public class FilmDbStorage implements FilmStorage {
         saveGenres(film);
         saveDirectors(film);
 
+        fillGenres(List.of(film));
         fillDirectors(List.of(film));
         return film;
     }
@@ -97,6 +98,7 @@ public class FilmDbStorage implements FilmStorage {
         saveGenres(film);
         saveDirectors(film);
 
+        fillGenres(List.of(film));
         fillDirectors(List.of(film));
         return film;
     }
