@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -139,8 +138,15 @@ public class UserService {
     public List<Film> getRecommendations(Long userId) {
         findById(userId);
 
-        Set<Long> userLikedFilms =
-                new HashSet<>(filmStorage.findLikedFilmIds(userId));
+        List<User> users = userStorage.findAll();
+        List<Long> userIds = users.stream()
+                .map(User::getId)
+                .toList();
+
+        var likedFilmsByUser = filmStorage.findLikedFilmIdsByUserIds(userIds);
+        Set<Long> userLikedFilms = new HashSet<>(
+                likedFilmsByUser.getOrDefault(userId, List.of())
+        );
 
         if (userLikedFilms.isEmpty()) {
             return List.of();
@@ -149,15 +155,14 @@ public class UserService {
         Long similarUserId = null;
         int maxCommonLikes = 0;
 
-        for (User otherUser : userStorage.findAll()) {
+        for (User otherUser : users) {
             if (otherUser.getId().equals(userId)) {
                 continue;
             }
 
-            Set<Long> otherUserLikedFilms =
-                    new HashSet<>(
-                            filmStorage.findLikedFilmIds(otherUser.getId())
-                    );
+            Set<Long> otherUserLikedFilms = new HashSet<>(
+                    likedFilmsByUser.getOrDefault(otherUser.getId(), List.of())
+            );
 
             Set<Long> commonFilms = new HashSet<>(userLikedFilms);
             commonFilms.retainAll(otherUserLikedFilms);
@@ -172,16 +177,13 @@ public class UserService {
             return List.of();
         }
 
-        Set<Long> recommendedFilmIds =
-                new HashSet<>(
-                        filmStorage.findLikedFilmIds(similarUserId)
-                );
-
+        Set<Long> recommendedFilmIds = new HashSet<>(
+                likedFilmsByUser.getOrDefault(similarUserId, List.of())
+        );
         recommendedFilmIds.removeAll(userLikedFilms);
 
-        return recommendedFilmIds.stream()
-                .map(filmStorage::findById)
-                .flatMap(Optional::stream)
+        return filmStorage.findAll().stream()
+                .filter(film -> recommendedFilmIds.contains(film.getId()))
                 .toList();
     }
 }

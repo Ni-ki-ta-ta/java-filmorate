@@ -6,8 +6,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.Operation;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -18,6 +16,7 @@ import java.util.List;
 public class EventDbStorage implements EventStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final EventRowMapper eventRowMapper;
 
     @Override
     public Event addEvent(Event event) {
@@ -69,19 +68,6 @@ public class EventDbStorage implements EventStorage {
                 ORDER BY timestamp ASC, event_id ASC
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            Event event = new Event();
-            event.setEventId(rs.getLong("event_id"));
-            event.setTimestamp(rs.getLong("timestamp"));
-            event.setUserId(rs.getLong("user_id"));
-            event.setEventType(
-                    EventType.valueOf(rs.getString("event_type"))
-            );
-            event.setOperation(
-                    Operation.valueOf(rs.getString("operation"))
-            );
-            event.setEntityId(rs.getLong("entity_id"));
-            return event;
-        }, userId);
+        return jdbcTemplate.query(sql, eventRowMapper, userId);
     }
 }

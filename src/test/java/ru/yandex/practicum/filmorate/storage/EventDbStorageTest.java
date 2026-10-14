@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@Import(EventDbStorage.class)
+@Import({EventDbStorage.class, EventRowMapper.class})
 class EventDbStorageTest {
 
     @Autowired

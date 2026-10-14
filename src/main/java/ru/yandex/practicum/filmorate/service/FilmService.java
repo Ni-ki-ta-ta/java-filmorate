@@ -113,13 +113,27 @@ public class FilmService {
             return;
         }
 
-        for (Director director : film.getDirectors()) {
-            if ((director == null) || (director.getId() == null)) {
-                throw new ValidationException("id режисёра не указано");
-            }
-            directorService.findById(director.getId());
+        List<Integer> directorIds = film.getDirectors().stream()
+                .map(director -> {
+                    if (director == null || director.getId() == null) {
+                        throw new ValidationException("id режисёра не указано");
+                    }
+                    return director.getId();
+                })
+                .distinct()
+                .toList();
+
+        if (directorIds.isEmpty()) {
+            return;
         }
 
+        List<Integer> existingDirectorIds = directorStorage.findAll().stream()
+                .map(Director::getId)
+                .toList();
+
+        if (!existingDirectorIds.containsAll(directorIds)) {
+            throw new NotFoundException("Один или несколько режиссёров не найдены");
+        }
     }
 
     public void addLike(Long filmId, Long userId) {

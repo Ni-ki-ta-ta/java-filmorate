@@ -639,4 +639,31 @@ public class FilmDbStorage implements FilmStorage {
                 userId
         );
     }
+
+    @Override
+    public Map<Long, List<Long>> findLikedFilmIdsByUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        String placeholders = userIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = """
+                SELECT user_id, film_id
+                FROM film_likes
+                WHERE user_id IN (%s)
+                ORDER BY user_id, film_id
+                """.formatted(placeholders);
+
+        Map<Long, List<Long>> result = new HashMap<>();
+        jdbcTemplate.query(sql, rs -> {
+            Long userId = rs.getLong("user_id");
+            Long filmId = rs.getLong("film_id");
+            result.computeIfAbsent(userId, key -> new ArrayList<>()).add(filmId);
+        }, userIds.toArray());
+
+        return result;
+    }
 }

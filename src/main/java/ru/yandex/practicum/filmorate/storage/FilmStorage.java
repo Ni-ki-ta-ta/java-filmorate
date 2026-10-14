@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.enums.DirectorFilmsSortBy;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface FilmStorage {
@@ -31,6 +32,8 @@ public interface FilmStorage {
     List<Film> findPopular(int count, Integer genreId, Integer year);
 
     List<Long> findLikedFilmIds(Long userId);
+
+    Map<Long, List<Long>> findLikedFilmIdsByUserIds(List<Long> userIds);
 
     List<Film> findByDirector(Integer directorId, DirectorFilmsSortBy sortBy);
 

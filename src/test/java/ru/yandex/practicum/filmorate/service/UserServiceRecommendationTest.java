@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventRowMapper;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.EventDbStorage;
@@ -25,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({
         UserDbStorage.class,
         FilmDbStorage.class,
-        EventDbStorage.class
+        EventDbStorage.class,
+        EventRowMapper.class
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserServiceRecommendationTest {
