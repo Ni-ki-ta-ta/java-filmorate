@@ -1,0 +1,73 @@
+package ru.yandex.practicum.filmorate.storage;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Event;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class EventDbStorage implements EventStorage {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final EventRowMapper eventRowMapper;
+
+    @Override
+    public Event addEvent(Event event) {
+        String sql = """
+                INSERT INTO events (
+                    timestamp,
+                    user_id,
+                    event_type,
+                    operation,
+                    entity_id
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """;
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement statement = connection.prepareStatement(
+                    sql,
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            statement.setLong(1, event.getTimestamp());
+            statement.setLong(2, event.getUserId());
+            statement.setString(3, event.getEventType().name());
+            statement.setString(4, event.getOperation().name());
+            statement.setLong(5, event.getEntityId());
+            return statement;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            event.setEventId(key.longValue());
+        }
+
+        return event;
+    }
+
+    @Override
+    public List<Event> findByUserId(Long userId) {
+        String sql = """
+                SELECT event_id,
+                       timestamp,
+                       user_id,
+                       event_type,
+                       operation,
+                       entity_id
+                FROM events
+                WHERE user_id = ?
+                ORDER BY timestamp ASC, event_id ASC
+                """;
+
+        return jdbcTemplate.query(sql, eventRowMapper, userId);
+    }
+}

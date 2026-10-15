@@ -75,6 +75,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id);
+    }
+
+    @Override
     public Optional<User> findById(Long id) {
         String sql = """
                 SELECT user_id,
@@ -211,5 +216,23 @@ public class UserDbStorage implements UserStorage {
 
             return user;
         }, userId, otherUserId);
+    }
+
+    @Override
+    public boolean hasFriend(Long userId, Long friendId) {
+        String sql = """
+            SELECT COUNT(*)
+            FROM friends
+            WHERE user_id = ? AND friend_id = ?
+            """;
+
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                userId,
+                friendId
+        );
+
+        return count != null && count > 0;
     }
 }
